@@ -989,7 +989,7 @@ def zetatstest(vecTime, vecValue, arrEventTimes,
 def zetatest(vecSpikeTimes, arrEventTimes,
              dblUseMaxDur=None, intResampNum=100, boolPlot=False, dblJitterSize=2.0,
              tplRestrictRange=(-np.inf, np.inf), boolStitch=True,
-             boolDirectQuantile=False, boolReturnRate=False):
+             boolDirectQuantile=False, boolReturnRate=False,boolVariableIntervals=False):
     """
     Calculates neuronal responsiveness index ZETA.
 
@@ -1029,6 +1029,8 @@ def zetatest(vecSpikeTimes, arrEventTimes,
          [Note: requires many resamplings!]
     boolReturnRate : boolean
         switch to return dictionary with spiking rate features [note: return-time is much faster if this is False]
+    boolVariableIntervals : boolean
+        switch to use the second column of arrEventTimes as the window end times instead of dblUseMaxDur (default : False)
 
     Returns
     -------
@@ -1186,7 +1188,7 @@ def zetatest(vecSpikeTimes, arrEventTimes,
         return dblZetaP, dZETA, dRate, vecLatencies
 
     # is stop supplied?
-    if len(arrEventTimes.shape) > 1 and arrEventTimes.shape[1] > 1:
+    if len(arrEventTimes.shape) > 1 and arrEventTimes.shape[1] > 1 and not boolVariableIntervals:
         boolStopSupplied = True
         arrEventOnDur = arrEventTimes[:, 1] - arrEventTimes[:, 0]
         assert np.all(arrEventOnDur > 0), "at least one event in arrEventTimes has a negative duration"
@@ -1195,6 +1197,9 @@ def zetatest(vecSpikeTimes, arrEventTimes,
         boolStopSupplied = False
         dblMeanZ = np.nan
         dblMeanP = np.nan
+        
+    if boolVariableIntervals:
+        assert len(arrEventTimes.shape) > 1 and arrEventTimes.shape[1] > 1, "arrEventTimes must be a T-by-2 array if boolVariableIntervals is set to True"
 
     # trial dur
     if dblUseMaxDur is None:
