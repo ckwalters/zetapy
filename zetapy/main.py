@@ -989,7 +989,7 @@ def zetatstest(vecTime, vecValue, arrEventTimes,
 def zetatest(vecSpikeTimes, arrEventTimes,
              dblUseMaxDur=None, intResampNum=100, boolPlot=False, dblJitterSize=2.0,
              tplRestrictRange=(-np.inf, np.inf), boolStitch=True,
-             boolDirectQuantile=False, boolReturnRate=False,boolVariableIntervals=False):
+             boolDirectQuantile=False, boolReturnRate=False, boolVariableIntervals=False):
     """
     Calculates neuronal responsiveness index ZETA.
 
@@ -1199,7 +1199,8 @@ def zetatest(vecSpikeTimes, arrEventTimes,
         dblMeanP = np.nan
         
     if boolVariableIntervals:
-        assert len(arrEventTimes.shape) > 1 and arrEventTimes.shape[1] > 1, "arrEventTimes must be a T-by-2 array if boolVariableIntervals is set to True"
+        assert len(arrEventTimes.shape) > 1 and arrEventTimes.shape[1] > 1, \
+            "arrEventTimes must be a T-by-2 array if boolVariableIntervals is set to True"
 
     # trial dur
     if dblUseMaxDur is None:
@@ -1261,8 +1262,9 @@ def zetatest(vecSpikeTimes, arrEventTimes,
     boolParallel = False
 
     # %% calculate zeta
-    dZETA_One = calcZetaOne(vecSpikeTimes, vecEventStarts, dblUseMaxDur, intResampNum,
-                            boolDirectQuantile, dblJitterSize, boolStitch, boolParallel)
+    dZETA_One = calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum,
+                            boolDirectQuantile, dblJitterSize, boolStitch, boolParallel, boolVariableIntervals)
+
 
     # update and unpack
     dZETA.update(dZETA_One)
