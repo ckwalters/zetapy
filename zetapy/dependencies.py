@@ -182,6 +182,7 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
     dblZetaP = 1.0
     dblZETA = 0.0
     intZETAIdx = None
+    vecDurations = None
 
     dZETA = dict()
     dZETA['vecSpikeT'] = vecSpikeT
@@ -193,6 +194,7 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
     dZETA['dblZetaP'] = dblZetaP
     dZETA['dblZETA'] = dblZETA
     dZETA['intZETAIdx'] = intZETAIdx
+    dZETA['vecDurations'] = vecDurations
 
     # %% prep parallel processing
     # to do
@@ -214,6 +216,11 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
         arrEventTimes = np.reshape(arrEventTimes, (-1, 1))
     # define event starts
     vecEventT = arrEventTimes[:, 0]
+    if boolVariableIntervals:
+        vecDurations = arrEventTimes[:, 1] - arrEventTimes[:, 0]
+        vecDurations[vecDurations > dblUseMaxDur] = dblUseMaxDur
+    else:
+        vecDurations = np.repeat(dblUseMaxDur.copy(), vecEventT.size)
 
     dblMinPreEventT = np.min(arrEventTimes) - dblUseMaxDur * 5 * dblJitterSize
     dblStartT = max([vecSpikeTimes[0], dblMinPreEventT])
@@ -226,10 +233,7 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
         return dZETA
 
     # %% build pseudo data, stitching stimulus periods
-    if boolVariableIntervals:
-        vecDurations = arrEventTimes[:, 1] - arrEventTimes[:, 0]
-    else:
-        vecDurations = dblUseMaxDur.copy()
+
     if boolStitch:
         vecPseudoSpikeTimes, vecPseudoEventT, vecPseudoDurations = getPseudoSpikeVectors(vecSpikeTimes, vecEventT,
                                                                                          vecDurations)
@@ -237,11 +241,14 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
         vecPseudoSpikeTimes = vecSpikeTimes
         vecPseudoEventT = vecEventT
         vecPseudoDurations = vecDurations
+    vecDurationsOut = vecPseudoDurations.copy()
 
     # %% run normal
     # get data
     vecRealDeviation, vecRealFrac, vecRealFracLinear, vecSpikeT = getTempOffsetOne(
         vecPseudoSpikeTimes, vecPseudoEventT, vecPseudoDurations)
+
+    dblRateOut = len(vecSpikeT) / np.sum(vecDurationsOut)
 
     if vecRealDeviation.size < 3:
         logging.warning(
@@ -314,6 +321,8 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
     dZETA['dblZetaP'] = dblZetaP
     dZETA['dblZETA'] = dblZETA
     dZETA['intZETAIdx'] = intZETAIdx
+    dZETA['vecDurations'] = vecDurationsOut
+    dZETA['dblRate'] = dblRateOut
     return dZETA
 
 
@@ -322,7 +331,7 @@ def calcZetaOne(vecSpikeTimes, arrEventTimes, dblUseMaxDur, intResampNum, boolDi
 
 def getTempOffsetTwo(cellTimePerSpike1, cellTimePerSpike2, dblUseMaxDur, boolFastInterp=False, vecSpikeT=None):
     '''
-    vecSpikeT, vecThisDiff, vecThisFrac1, vecThisSpikeTimes1, vecThisFrac2, vecThisSpikeTimes2 = 
+    vecSpikeT, vecThisDiff, vecThisFrac1, vecThisSpikeTimes1, vecThisFrac2, vecThisSpikeTimes2 =
         getTempOffsetTwo(cellTimePerSpike1,cellTimePerSpike2,dblUseMaxDur)
     '''
 
@@ -590,16 +599,25 @@ def getLinearDistribution(vecDurations, numSpikes):
     totalTime = np.sum(vecDurations)
     linSpace = np.linspace(1 / numSpikes, 1, numSpikes) * totalTime
     previous = 0
+    vecDurations = np.sort(vecDurations.flatten())
     for i, duration in enumerate(vecDurations):
         activeIntervals = len(vecDurations) - i
         upperBound = previous + (duration - previous) * activeIntervals
-        inRange = (previous < linSpace <= upperBound)
+        inRange = (previous < linSpace) & (linSpace <= upperBound)
         linSpace[inRange] = previous + (linSpace[inRange] - previous) / activeIntervals
-        linSpace[upperBound:] = linSpace[upperBound:] - (duration - previous) * (activeIntervals - 1)
+        upperBoundInd = np.argmax(linSpace > upperBound)
+        linSpace[upperBoundInd:] = linSpace[upperBoundInd:] - (duration - previous) * (activeIntervals - 1)
         previous = duration
-    import matplotlib.pyplot as plt
-    plt.scatter(np.arange(len(linSpace)), linSpace)
-    plt.show()
+
+    # import matplotlib.pyplot as plt
+    # plt.figure(figsize=(15, 3))
+    # plt.scatter(linSpace, np.zeros(len(linSpace)), marker='|', s=50)
+    # xlim = plt.xlim()
+    # plt.scatter(linSpace * 2, np.ones(len(linSpace)) * 1, marker='|', s=50)
+    # plt.scatter(linSpace * 4, np.ones(len(linSpace)) * 2, marker='|', s=50)
+    # plt.scatter(linSpace * 10, np.ones(len(linSpace)) * 3, marker='|', s=50)
+    # plt.xlim(xlim)
+    # plt.show()
     return linSpace
 
 
@@ -747,7 +765,7 @@ def getPseudoSpikeVectors(vecSpikeTimes, vecEventTimes, windowDur, boolDiscardEd
 
     # %% recombine into vector
     vecPseudoSpikeTimes = np.array(sorted(flatten(cellPseudoSpikeT)))
-    return vecPseudoSpikeTimes, vecPseudoEventT, vecPseudoTrialDur
+    return vecPseudoSpikeTimes, vecPseudoEventT.flatten(), vecPseudoTrialDur.flatten()
 
 
 # %%

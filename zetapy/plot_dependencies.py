@@ -14,6 +14,7 @@ from scipy.signal import convolve
 from scipy.signal.windows import gaussian
 from zetapy.ts_dependencies import getInterpolatedTimeSeries
 
+
 # %% plottszeta2
 def plottszeta2(dZETA, intPlotRandSamples=50):
     '''
@@ -22,7 +23,7 @@ def plottszeta2(dZETA, intPlotRandSamples=50):
     Syntax:
     plottszeta2(dZETA, intPlotRandSamples=50)
     '''
-    
+
     # unpack dZETA
     try:
         dblZetaP = dZETA['dblZetaP']
@@ -30,10 +31,10 @@ def plottszeta2(dZETA, intPlotRandSamples=50):
         dblZETADeviation = dZETA['dblZETADeviation']
         dblZETATime = dZETA['dblZETATime']
         intZETAIdx = dZETA['intZETAIdx']
-        dblMeanZ   = dZETA['dblMeanZ']
-        dblMeanP  = dZETA['dblMeanP']
+        dblMeanZ = dZETA['dblMeanZ']
+        dblMeanP = dZETA['dblMeanP']
         vecMu1 = dZETA['vecMu1']
-        vecMu2  = dZETA['vecMu2']
+        vecMu2 = dZETA['vecMu2']
         dblZETADeviation_InvSign = dZETA['dblZETADeviation_InvSign']
         dblZETATime_InvSign = dZETA['dblZETATime_InvSign']
         intZETAIdx_InvSign = dZETA['intZETAIdx_InvSign']
@@ -59,15 +60,15 @@ def plottszeta2(dZETA, intPlotRandSamples=50):
 
     # Create figure
     f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12, 6), dpi=dpi)
-    
+
     # top left: heat map 1
     x0 = vecRefTime[1]
     x1 = vecRefTime[-1]
-    xw = x1-x0
+    xw = x1 - x0
     intTrialNum1 = matTracePerTrial1.shape[0]
-    yh = intTrialNum1-1
+    yh = intTrialNum1 - 1
     pos = ax1.imshow(matTracePerTrial1, interpolation='none', extent=[x0, x1, 1, intTrialNum1])
-    ax1.set_aspect((xw/yh)/2)
+    ax1.set_aspect((xw / yh) / 2)
     ax1.set(xlabel='Time after event (s)', ylabel='Trial number',
             title='Cond1; Color indicates data value')
     f.colorbar(pos, ax=ax1)
@@ -75,23 +76,23 @@ def plottszeta2(dZETA, intPlotRandSamples=50):
     # bottom left: heat map 2
     x0 = vecRefTime[1]
     x1 = vecRefTime[-1]
-    xw = x1-x0
+    xw = x1 - x0
     intTrialNum2 = matTracePerTrial2.shape[0]
-    yh = intTrialNum2-1
+    yh = intTrialNum2 - 1
     pos = ax2.imshow(matTracePerTrial2, interpolation='none', extent=[x0, x1, 1, intTrialNum2])
-    ax2.set_aspect((xw/yh)/2)
+    ax2.set_aspect((xw / yh) / 2)
     ax2.set(xlabel='Time after event (s)', ylabel='Trial number',
             title='Cond2; Color indicates data value')
     f.colorbar(pos, ax=ax2)
-    
+
     # top right: cumulative sums
     ax3.plot(vecRefTime, vecRealFrac1)
     ax3.plot(vecRefTime, vecRealFrac2)
     ax3.set(xlabel='Time after event (s)', ylabel='Scaled cumulative data (s)')
 
     # bottom right: deviation with random bootstraps
-    for i in range(intPlotRandSamples-1):
-        ax4.plot(vecRefTime, matRandDiff[i,:], color=[0.7, 0.7, 0.7])
+    for i in range(intPlotRandSamples - 1):
+        ax4.plot(vecRefTime, matRandDiff[i, :], color=[0.7, 0.7, 0.7])
     ax4.plot(vecRefTime, vecRealDiff)
     ax4.plot(dblZETATime, dblZETADeviation, 'bx')
     ax4.plot(dblZETATime_InvSign, dblZETADeviation_InvSign, 'b*')
@@ -103,6 +104,7 @@ def plottszeta2(dZETA, intPlotRandSamples=50):
 
     f.tight_layout()
     plt.show()
+
 
 # %% plotzeta2
 def plotzeta2(vecSpikeTimes1, arrEventTimes1, vecSpikeTimes2, arrEventTimes2, dZETA,
@@ -137,9 +139,9 @@ def plotzeta2(vecSpikeTimes1, arrEventTimes1, vecSpikeTimes2, arrEventTimes2, dZ
     Version history:
     1.0 - 25 October 2023 Created by Jorrit Montijn
     '''
-    
+
     # %% check input
-    
+
     # vecSpikeTimes1 must be [S by 1] array
     assert (len(vecSpikeTimes1.shape) == 1 or vecSpikeTimes1.shape[1] == 1) and issubclass(
         vecSpikeTimes1.dtype.type, np.floating), "Input vecSpikeTimes1 is not a 1D float np.array with >2 spike times"
@@ -192,7 +194,7 @@ def plotzeta2(vecSpikeTimes1, arrEventTimes1, vecSpikeTimes2, arrEventTimes2, dZ
         dblZETADeviation = dZETA['dblZETADeviation']
         dblZetaT = dZETA['dblZetaT']
         intZetaIdx = dZETA['intZetaIdx']
-        
+
         dblD_InvSign = dZETA['dblD_InvSign']
         dblZetaT_InvSign = dZETA['dblZetaT_InvSign']
         intZetaIdx_InvSign = dZETA['intZetaIdx_InvSign']
@@ -227,8 +229,10 @@ def plotzeta2(vecSpikeTimes1, arrEventTimes1, vecSpikeTimes2, arrEventTimes2, dZ
         dblReduceSpikesBy = min(vecSpikeTimes1.size / intPlotSpikeNum, vecSpikeTimes2.size / intPlotSpikeNum)
         intPlotSpikeNum1 = np.round(dblReduceSpikesBy * vecSpikeTimes1.size).astype(int)
         intPlotSpikeNum2 = np.round(dblReduceSpikesBy * vecSpikeTimes2.size).astype(int)
-        vecSpikeT1_reduced = vecSpikeTimes1[np.round(np.linspace(0, vecSpikeTimes1.size-1, intPlotSpikeNum1)).astype(int)]
-        vecSpikeT2_reduced = vecSpikeTimes1[np.round(np.linspace(0, vecSpikeTimes2.size-1, intPlotSpikeNum2)).astype(int)]
+        vecSpikeT1_reduced = vecSpikeTimes1[
+            np.round(np.linspace(0, vecSpikeTimes1.size - 1, intPlotSpikeNum1)).astype(int)]
+        vecSpikeT2_reduced = vecSpikeTimes1[
+            np.round(np.linspace(0, vecSpikeTimes2.size - 1, intPlotSpikeNum2)).astype(int)]
     else:
         vecSpikeT1_reduced = vecSpikeTimes1
         vecSpikeT2_reduced = vecSpikeTimes2
@@ -247,14 +251,13 @@ def plotzeta2(vecSpikeTimes1, arrEventTimes1, vecSpikeTimes2, arrEventTimes2, dZ
         ax3.vlines(event_spks - t, i + 1, i, color='k', lw=0.3)
     ax3.set(xlabel='Time after event (s)', ylabel='Trial #', title='Spike raster plot 2')
 
-    
     # top right: cumulative sums
     ax2.plot(vecSpikeT, vecRealFrac1)
     ax2.plot(vecSpikeT, vecRealFrac2)
     ax2.set(xlabel='Time after event (s)', ylabel='Scaled cumulative spiking density (s)')
 
     # bottom right: deviation with random jitters
-    for i in range(intPlotRandSamples-1):
+    for i in range(intPlotRandSamples - 1):
         ax4.plot(cellRandTime[i], cellRandDiff[i], color=[0.7, 0.7, 0.7])
     ax4.plot(vecSpikeT, vecRealDiff)
     ax4.plot(dblZetaT, dblZETADeviation, 'bx')
@@ -268,9 +271,10 @@ def plotzeta2(vecSpikeTimes1, arrEventTimes1, vecSpikeTimes2, arrEventTimes2, dZ
     f.tight_layout()
     plt.show()
 
+
 # %% plotzeta
 def plotzeta(vecSpikeTimes, arrEventTimes, dZETA, dRate,
-             intPlotRandSamples=50, intPlotSpikeNum=10000):
+             intPlotRandSamples=50, intPlotSpikeNum=10000, return_fig=False):
     '''
     Creates figure for ZETA-test analysis
 
@@ -376,7 +380,7 @@ def plotzeta(vecSpikeTimes, arrEventTimes, dZETA, dRate,
 
     # top left: raster
     if vecSpikeTimes.size > intPlotSpikeNum:
-        vecSpikeT_reduced = vecSpikeTimes[np.round(np.linspace(0, vecSpikeTimes.size-1, intPlotSpikeNum)).astype(int)]
+        vecSpikeT_reduced = vecSpikeTimes[np.round(np.linspace(0, vecSpikeTimes.size - 1, intPlotSpikeNum)).astype(int)]
     else:
         vecSpikeT_reduced = vecSpikeTimes
 
@@ -389,13 +393,13 @@ def plotzeta(vecSpikeTimes, arrEventTimes, dZETA, dRate,
     # top right: psth
     peth, binned_spikes = calculatePeths(vecSpikeTimes, np.ones(vecSpikeTimes.shape), [1],
                                          vecEventStarts, pre_time=0, post_time=dblUseMaxDur,
-                                         bin_size=dblUseMaxDur/25, smoothing=0)
+                                         bin_size=dblUseMaxDur / 25, smoothing=0)
     ax2.errorbar(peth['tscale'], peth['means'][0, :], yerr=peth['sems'])
     ax2.set(xlabel='Time after event (s)', ylabel='spks/s',
             title='Mean spiking over trials')
 
     # bottom left: deviation with random jitters
-    for i in range(intPlotRandSamples-1):
+    for i in range(intPlotRandSamples - 1):
         ax3.plot(cellRandTime[i], cellRandDeviation[i], color=[0.7, 0.7, 0.7])
     ax3.plot(vecSpikeT, vecRealDeviation)
     ax3.plot(dblLatencyZETA, dblZETADeviation, 'bx')
@@ -408,7 +412,7 @@ def plotzeta(vecSpikeTimes, arrEventTimes, dZETA, dRate,
 
     # bottom right: ifr
     if len(vecRateT) > 1000:
-        vecSubset = np.round(np.linspace(0, len(vecRateT)-1, 1000)).astype(int)
+        vecSubset = np.round(np.linspace(0, len(vecRateT) - 1, 1000)).astype(int)
         ax4.plot(vecRateT[vecSubset], vecRate[vecSubset])
     else:
         ax4.plot(vecRateT, vecRate)
@@ -431,7 +435,11 @@ def plotzeta(vecSpikeTimes, arrEventTimes, dZETA, dRate,
         ax4.plot(vecLatencies[3], vecLatencyVals[3], 'rx')
 
     f.tight_layout()
-    plt.show()
+    if return_fig:
+        return f
+    else:
+        plt.show()
+
 
 # %% plottszeta
 
@@ -538,7 +546,7 @@ def plottszeta(vecTime, vecData, arrEventTimes, dZETA, intPlotRandSamples=50):
     # %% calculate heat map
     # sampling interval
     dblSamplingInterval = np.median(np.diff(vecTime))
-    vecRefT = np.arange(dblSamplingInterval/2, dblUseMaxDur, dblSamplingInterval)
+    vecRefT = np.arange(dblSamplingInterval / 2, dblUseMaxDur, dblSamplingInterval)
     vecRefT, matAct = getInterpolatedTimeSeries(vecTime, vecData, vecEventTimes, vecRefT)
 
     # %% plot
@@ -555,18 +563,18 @@ def plottszeta(vecTime, vecData, arrEventTimes, dZETA, intPlotRandSamples=50):
     # top left: heat map
     x0 = vecRefT[1]
     x1 = vecRefT[-1]
-    xw = x1-x0
+    xw = x1 - x0
     intTrialNum = matAct.shape[0]
-    yh = intTrialNum-1
+    yh = intTrialNum - 1
     pos = ax1.imshow(matAct, interpolation='none', extent=[x0, x1, 1, intTrialNum])
-    ax1.set_aspect((xw/yh)/2)
+    ax1.set_aspect((xw / yh) / 2)
     ax1.set(xlabel='Time after event (s)', ylabel='Trial number',
             title='Color indicates data value')
     f.colorbar(pos, ax=ax1)
 
     # top right: mean +/- SEM
     vecMean = np.mean(matAct, axis=0)
-    vecSem = np.std(matAct, axis=0)/np.sqrt(intTrialNum)
+    vecSem = np.std(matAct, axis=0) / np.sqrt(intTrialNum)
     ax2.errorbar(vecRefT, vecMean, yerr=vecSem)
     ax2.set(xlabel='Time after event (s)', ylabel='Data value',
             title='Mean +/- SEM over trials')
@@ -580,7 +588,7 @@ def plottszeta(vecTime, vecData, arrEventTimes, dZETA, intPlotRandSamples=50):
     ax3.set(xlabel='Time after event (s)', ylabel='Cumulative data', title='Time-series zeta-test')
 
     # bottom right: deviation with random jitters
-    for i in range(intPlotRandSamples-1):
+    for i in range(intPlotRandSamples - 1):
         ax4.plot(cellRandTime[i], cellRandDeviation[i], color=[0.7, 0.7, 0.7])
     ax4.plot(vecRealTime, vecRealDeviation)
     ax4.plot(dblLatencyZETA, dblZETADeviation, 'bx')
@@ -594,16 +602,17 @@ def plottszeta(vecTime, vecData, arrEventTimes, dZETA, intPlotRandSamples=50):
     f.tight_layout()
     plt.show()
 
+
 def calculatePeths(
         spike_times, spike_clusters, cluster_ids, align_times, pre_time=0.2,
         post_time=0.5, bin_size=0.025, smoothing=0.025, return_fr=True):
     """
     Calcluate peri-event time histograms; return means and standard deviations
     for each time point across specified clusters
-    
+
     Code modified from Brainbox library of the International Brain Laboratory
     https://github.com/int-brain-lab/ibllib/blob/master/brainbox/singlecell.py
-    
+
     :param spike_times: spike times (in seconds)
     :type spike_times: array-like
     :param spike_clusters: cluster ids corresponding to each event in `spikes`
