@@ -1,5 +1,5 @@
 ## zetapy fork
-For intervals of defined lengths, forked from esutlief.
+For intervals of defined lengths, forked from esutlie.
 
 ## zetapy
 Repository containing ZETA functions and dependencies. For an example of how to use the code, check example.py. 
